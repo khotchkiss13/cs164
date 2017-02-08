@@ -163,6 +163,11 @@ public class RegexParser {
 
     private static AutomatonState special(AutomatonState current) {
         if (special.contains(token)) {
+            if (token == 'n') {
+                token = '\n';
+            } else if (token == 't') {
+                token = '\t';
+            }
             AutomatonState next = new AutomatonState();
             current.addTransition(token, next);
             advance();
