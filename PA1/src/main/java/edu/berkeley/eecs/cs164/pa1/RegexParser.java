@@ -49,9 +49,13 @@ public class RegexParser {
      static private int pos;
      static char[] input;
      static char token;
-     static Set<Character> quantifiers;
-     static Set<Character> operators;
-     static Set<Character> special;
+     static Character[] quant = new Character[] { '*', '+', '?' };
+     static Character[] ops = new Character[] { '|', '(', ')', '\\' };
+     static Character[] spec = new Character[] { 'n', 't' };
+     static Set<Character> quantifiers = new HashSet<Character>(Arrays.asList(quant));
+     static Set<Character> operators = new HashSet<Character>(Arrays.asList(ops));
+     static Set<Character> special = new HashSet<Character>(Arrays.asList(spec));
+
 
     private RegexParser() {
     }
@@ -59,12 +63,6 @@ public class RegexParser {
     private static void initialize(String pattern) {
         pos = 0;
         input = pattern.toCharArray();
-        Character[] quant = new Character[] { '*', '+', '?' };
-        Character[] ops = new Character[] { '|', '(', ')', '\\' };
-        Character[] spec = new Character[] { 'n', 't' };
-        quantifiers = new HashSet<Character>(Arrays.asList(quant));
-        operators = new HashSet<Character>(Arrays.asList(ops));
-        special = new HashSet<Character>(Arrays.asList(spec));
         operators.addAll(quantifiers);
         special.addAll(operators);
     }
@@ -80,12 +78,13 @@ public class RegexParser {
      */
     public static Automaton parse(String pattern) {
         initialize(pattern);
+        AutomatonState start = new AutomatonState();
         advance();
-        expr();
+        AutomatonState last = expr(start);
         if (pos != input.length) {
             throw new RegexParseException("Parsing failed to process entire input string");
         }
-        return new Automaton(null, null);
+        return new Automaton(start, last);
     }
 
     private static char getToken() {
@@ -94,7 +93,6 @@ public class RegexParser {
 
     private static void advance() {
         token = getToken();
-        System.out.println("Token: "+token);
     }
 
     private static void match(char t) {
@@ -105,44 +103,87 @@ public class RegexParser {
         }
     }
 
-    private static void expr() {
-        term();
+    private static AutomatonState expr(AutomatonState current) {
+        AutomatonState next = new AutomatonState();
+        AutomatonState last = new AutomatonState();
+        current.addEpsilonTransition(next);
+        AutomatonState exit = term(next);
+        exit.addEpsilonTransition(last);
         while (token == '|' && token != 0) {
             advance();
-            term();
+            next = new AutomatonState();
+            current.addEpsilonTransition(next);
+            exit = term(next);
+            exit.addEpsilonTransition(last);
         }
+        return last;
     }
 
-    private static void term() {
-        factor();
+    private static AutomatonState term(AutomatonState current) {
+        AutomatonState last = factor(current);
         while (token != '|' && token != 0) {
-            factor();
+            try {
+                last = factor(last);
+            } catch (RegexParseException e){
+                break;
+            }
         }
+        return last;
     }
 
-    private static void factor() {
-        atom();
+    private static AutomatonState factor(AutomatonState current) {
+        AutomatonState last = atom(current);
         if (quantifiers.contains(token)) {
+            if (token == '+') {
+                last.addEpsilonTransition(current);
+            } else if (token == '*') {
+                last.addEpsilonTransition(current);
+                current.addEpsilonTransition(last);
+            } else if (token == '?') {
+                current.addEpsilonTransition(last);
+            }
             advance();
         }
+        return last;
     }
 
-    private static void atom() {
+    private static AutomatonState atom(AutomatonState current) {
+        AutomatonState next = new AutomatonState();
+        current.addTransition(token, next);
+        AutomatonState exit;
+        AutomatonState last = new AutomatonState();
         if (token == '(') {
+            System.out.println("Starting par");
+            System.out.println("Token: "+token);
             advance();
-            expr();
+            current.addTransition(token, next);
+            exit = expr(next);
+            exit.addTransition(token, last);
+            System.out.println("Token: "+token);
+            System.out.println("Ending par");
             match(')');
         } else if (token == '\\') {
+            System.out.println("Starting esc");
+            System.out.println("Token: "+token);
             advance();
-            special();
+            System.out.println("Token: "+token);
+            System.out.println("Ending esc");
+            last = special(current);
         } else {
+            System.out.println("Solo Char");
+            System.out.println("Token: "+token);
             character();
+            last = current;
         }
+        return last;
     }
 
-    private static void special() {
+    private static AutomatonState special(AutomatonState current) {
         if (special.contains(token)) {
+            AutomatonState next = new AutomatonState();
+            current.addTransition(token, next);
             advance();
+            return next;
         } else {
             throw new RegexParseException("Incorrect Special Character");
         }
@@ -153,6 +194,7 @@ public class RegexParser {
             advance();
         } else {
             throw new RegexParseException("Invalid Character");
+            // System.out.println("FUCK: " + token);
         }
     }
 }
