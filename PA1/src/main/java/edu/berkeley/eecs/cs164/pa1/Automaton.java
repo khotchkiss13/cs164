@@ -51,6 +51,7 @@ public class Automaton {
             for (Map.Entry<Character, Set<AutomatonState>> entry : current.getAllTransitions()) {
                 for (AutomatonState target : entry.getValue()) {
                     String label = String.format("\"%s\"", entry.getKey() == null ? "&epsilon;" : entry.getKey());
+                    label = label.replaceAll("\\\\", "\\\\\\\\");
                     printTraversal(target, visited, builder);
                     builder.append(String.format("\ts%d -> s%d [label=%s];%n", current.getMyId(), target.getMyId(), label));
                 }
