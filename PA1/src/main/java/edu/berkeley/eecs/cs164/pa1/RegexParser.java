@@ -41,24 +41,31 @@ public class RegexParser {
      * factor       -> atom ('+'|'*'|'?')?
      * atom         -> '(' expr ')' | '\' special | char
      * special      -> 'n' | 't' | operators
-     * operators    -> '|', '(', ')', '*', '+', '?', '\'
-     * chars        -> !operators
+     * operator     -> '|', '(', ')', '*', '+', '?', '\'
+     * character    -> !operators
      *
      */
 
-     private static int pos;
-     private static char[] input;
-     private static char token;
-     private static Character[] quantify = new Character[] { '*', '+', '?' };
-     private static Character[] ops = new Character[] { '|', '(', ')', '\\' };
-     private static Character[] spec = new Character[] { 'n', 't' };
-     private static Set<Character> quantifiers = new HashSet<Character>(Arrays.asList(quantify));
-     private static Set<Character> operators = new HashSet<Character>(Arrays.asList(ops));
-     private static Set<Character> special = new HashSet<Character>(Arrays.asList(spec));
 
-     private enum Error {
-        EOS, INV_CHAR, INV_SPEC, UNEXPECTED_TOK
-    }
+    /**
+      * Global Variables
+      *
+      * These variables are used throughout the parser to allow access to
+      * commonly accessed variables across all functions.
+      *
+      */
+    private static int pos;
+    private static char[] input;
+    private static char token;
+    private static Set<Character> quantifiers = new HashSet<Character>(
+        Arrays.asList(new Character[] { '*', '+', '?' })
+    );
+    private static Set<Character> operators = new HashSet<Character>(
+        Arrays.asList(new Character[] { '*', '+', '?', '|', '(', ')', '\\' })
+    );
+    private static Set<Character> specials = new HashSet<Character>(
+        Arrays.asList(new Character[] { '*', '+', '?', '|', '(', ')', '\\', 'n', 't' })
+    );
 
     /**
      * This is the main function of this object. It kicks off
@@ -70,22 +77,33 @@ public class RegexParser {
      * @throws RegexParseException upon encountering a parse error
      */
     static Automaton parse(String pattern) {
-        initialize(pattern);
+        pos = 0;
+        input = pattern.toCharArray();
         Automaton nfa = constructNFA();
         if (pos != input.length) parseError(Error.EOS, token);
         return nfa;
     }
 
-    private static void initialize(String pattern) {
-        pos = 0;
-        input = pattern.toCharArray();
-        operators.addAll(quantifiers);
-        special.addAll(operators);
-    }
 
+    /**
+     * NFA Construction
+     *
+     * The following functions are used to parse the string into the
+     * correct tokens as specified in the Equivalent Grammar from above.
+     * Each function keeps track of the current state passed to it,
+     * calls the appropriate parse function to get the next state, and then
+     * connects the current and next states together as specified by the
+     * operators in the term.
+     *
+     * General function pattern:
+     * @param current Current Automata state that has been parsed
+     * @return The end Automata state of the substring the function is
+     *         responsible for
+     * @throws RegexParseException upon encountering a parse error
+     */
     private static Automaton constructNFA() {
-        AutomatonState start = new AutomatonState();
         advance();
+        AutomatonState start = new AutomatonState();
         AutomatonState last = expr(start);
         return new Automaton(start, last);
     }
@@ -132,7 +150,7 @@ public class RegexParser {
         if (token == '(') {
             advance();
             last = expr(current);
-            closeParenthesis();
+            closeCaptureGroup();
         } else if (token == '\\') {
             advance();
             last = special(current);
@@ -143,7 +161,7 @@ public class RegexParser {
     }
 
     private static AutomatonState special(AutomatonState current) {
-        if (!special.contains(token)) { parseError(Error.INV_SPEC, token); }
+        if (!specials.contains(token)) { parseError(Error.INV_SPEC, token); }
         if (token == 'n') {
             token = '\n';
         } else if (token == 't') {
@@ -163,6 +181,18 @@ public class RegexParser {
         return next;
     }
 
+
+    /**
+     * Token Manipulation
+     *
+     * The following functions are used to incremement the token
+     *
+     */
+
+    private enum Error {
+        EOS, INV_CHAR, INV_SPEC, UNEXPECTED_TOK
+    }
+
     private static char getToken() {
         return (pos < input.length) ? input[pos++] : 0;
     }
@@ -171,10 +201,17 @@ public class RegexParser {
         token = getToken();
     }
 
-    private static void closeParenthesis() {
+    private static void closeCaptureGroup() {
          if (token == ')') advance(); else parseError(Error.UNEXPECTED_TOK, token);
     }
 
+    /**
+     * parseHelper
+     *
+     * Helper function that will throw the RegexParseException with the correct
+     * message, detailing exactly what happened.
+     *
+     */
     private static void parseError(Error errorCode, Character tok) {
         String message;
         switch (errorCode) {
