@@ -85,7 +85,7 @@ public class RegexParser {
             throw new RegexParseException("Parsing failed to process entire input string");
         }
         Automaton result = new Automaton(start, last);
-        System.out.println(result.toString());
+        // System.out.println(result.toString());
         return result;
     }
 
