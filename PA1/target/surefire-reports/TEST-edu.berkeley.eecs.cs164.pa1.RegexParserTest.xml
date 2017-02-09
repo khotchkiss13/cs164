@@ -62,11 +62,11 @@
     <property name="ftp.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
     <property name="sun.cpu.isalist" value=""/>
   </properties>
-  <testcase classname="edu.berkeley.eecs.cs164.pa1.RegexParserTest" name="testZeroOrMore" time="0"/>
-  <testcase classname="edu.berkeley.eecs.cs164.pa1.RegexParserTest" name="testOneOrMore" time="0"/>
+  <testcase classname="edu.berkeley.eecs.cs164.pa1.RegexParserTest" name="testOr" time="0"/>
+  <testcase classname="edu.berkeley.eecs.cs164.pa1.RegexParserTest" name="testOptional" time="0"/>
   <testcase classname="edu.berkeley.eecs.cs164.pa1.RegexParserTest" name="testUnbalancedParentheses" time="0"/>
   <testcase classname="edu.berkeley.eecs.cs164.pa1.RegexParserTest" name="testUnbalancedParenthesesEscape" time="0"/>
-  <testcase classname="edu.berkeley.eecs.cs164.pa1.RegexParserTest" name="testOptional" time="0"/>
   <testcase classname="edu.berkeley.eecs.cs164.pa1.RegexParserTest" name="testEscape" time="0"/>
-  <testcase classname="edu.berkeley.eecs.cs164.pa1.RegexParserTest" name="testOr" time="0"/>
+  <testcase classname="edu.berkeley.eecs.cs164.pa1.RegexParserTest" name="testZeroOrMore" time="0"/>
+  <testcase classname="edu.berkeley.eecs.cs164.pa1.RegexParserTest" name="testOneOrMore" time="0"/>
 </testsuite>

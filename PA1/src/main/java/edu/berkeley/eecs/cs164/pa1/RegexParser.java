@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Arrays;
 
 /**
- * This class parses a simple regular expression syntax into an NFA
+ * This class parses a simple regular expression syntax into an NFA.
  */
 public class RegexParser {
     /**
@@ -185,7 +185,7 @@ public class RegexParser {
     /**
      * Token Manipulation
      *
-     * The following functions are used to incremement the token
+     * The following functions are used to incremement the token.
      *
      */
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<testsuite tests="8" failures="0" name="edu.berkeley.eecs.cs164.pa1.NFASimulatorTest" time="0.778" errors="0" skipped="0">
+<testsuite tests="8" failures="0" name="edu.berkeley.eecs.cs164.pa1.NFASimulatorTest" time="0.89" errors="0" skipped="0">
   <properties>
     <property name="java.runtime.name" value="Java(TM) SE Runtime Environment"/>
     <property name="sun.boot.library.path" value="/Library/Java/JavaVirtualMachines/jdk1.8.0_121.jdk/Contents/Home/jre/lib"/>
@@ -63,11 +63,11 @@
     <property name="sun.cpu.isalist" value=""/>
   </properties>
   <testcase classname="edu.berkeley.eecs.cs164.pa1.NFASimulatorTest" name="testSingleAtom" time="0.011"/>
-  <testcase classname="edu.berkeley.eecs.cs164.pa1.NFASimulatorTest" name="testZeroOrMore" time="0.001"/>
-  <testcase classname="edu.berkeley.eecs.cs164.pa1.NFASimulatorTest" name="testOneOrMore" time="0.007"/>
-  <testcase classname="edu.berkeley.eecs.cs164.pa1.NFASimulatorTest" name="testZeroOrOne" time="0.003"/>
-  <testcase classname="edu.berkeley.eecs.cs164.pa1.NFASimulatorTest" name="testEscapeAtom" time="0.007"/>
-  <testcase classname="edu.berkeley.eecs.cs164.pa1.NFASimulatorTest" name="testConcatenation" time="0.003"/>
-  <testcase classname="edu.berkeley.eecs.cs164.pa1.NFASimulatorTest" name="testNestedExpressions" time="0.012"/>
-  <testcase classname="edu.berkeley.eecs.cs164.pa1.NFASimulatorTest" name="testWorstCasePerformance" time="0.734"/>
+  <testcase classname="edu.berkeley.eecs.cs164.pa1.NFASimulatorTest" name="testZeroOrMore" time="0.004"/>
+  <testcase classname="edu.berkeley.eecs.cs164.pa1.NFASimulatorTest" name="testOneOrMore" time="0.006"/>
+  <testcase classname="edu.berkeley.eecs.cs164.pa1.NFASimulatorTest" name="testZeroOrOne" time="0.004"/>
+  <testcase classname="edu.berkeley.eecs.cs164.pa1.NFASimulatorTest" name="testEscapeAtom" time="0.01"/>
+  <testcase classname="edu.berkeley.eecs.cs164.pa1.NFASimulatorTest" name="testConcatenation" time="0.018"/>
+  <testcase classname="edu.berkeley.eecs.cs164.pa1.NFASimulatorTest" name="testNestedExpressions" time="0.02"/>
+  <testcase classname="edu.berkeley.eecs.cs164.pa1.NFASimulatorTest" name="testWorstCasePerformance" time="0.817"/>
 </testsuite>
