@@ -8,7 +8,6 @@ import java.util.Arrays;
  * This class parses a simple regular expression syntax into an NFA
  */
 public class RegexParser {
-
     /**
      * Grammar: (+ amd * are right-associative)
      * expr    -> term
@@ -36,6 +35,7 @@ public class RegexParser {
      * <p>
      * <p>
      * Equivalent grammar:
+     *
      * expr         -> term ('|' term)*
      * term         -> factor+
      * factor       -> atom ('+'|'*'|'?')?
@@ -46,25 +46,18 @@ public class RegexParser {
      *
      */
 
-     static private int pos;
-     static char[] input;
-     static char token;
-     static Character[] quant = new Character[] { '*', '+', '?' };
-     static Character[] ops = new Character[] { '|', '(', ')', '\\' };
-     static Character[] spec = new Character[] { 'n', 't' };
-     static Set<Character> quantifiers = new HashSet<Character>(Arrays.asList(quant));
-     static Set<Character> operators = new HashSet<Character>(Arrays.asList(ops));
-     static Set<Character> special = new HashSet<Character>(Arrays.asList(spec));
+     private static int pos;
+     private static char[] input;
+     private static char token;
+     private static Character[] quantify = new Character[] { '*', '+', '?' };
+     private static Character[] ops = new Character[] { '|', '(', ')', '\\' };
+     private static Character[] spec = new Character[] { 'n', 't' };
+     private static Set<Character> quantifiers = new HashSet<Character>(Arrays.asList(quantify));
+     private static Set<Character> operators = new HashSet<Character>(Arrays.asList(ops));
+     private static Set<Character> special = new HashSet<Character>(Arrays.asList(spec));
 
-
-    private RegexParser() {
-    }
-
-    private static void initialize(String pattern) {
-        pos = 0;
-        input = pattern.toCharArray();
-        operators.addAll(quantifiers);
-        special.addAll(operators);
+     private enum Error {
+        EOS, INV_CHAR, INV_SPEC, UNEXPECTED_TOK
     }
 
     /**
@@ -76,46 +69,34 @@ public class RegexParser {
      * @return an NFA accepting the pattern
      * @throws RegexParseException upon encountering a parse error
      */
-    public static Automaton parse(String pattern) {
+    static Automaton parse(String pattern) {
         initialize(pattern);
+        Automaton nfa = constructNFA();
+        if (pos != input.length) parseError(Error.EOS, token);
+        return nfa;
+    }
+
+    private static void initialize(String pattern) {
+        pos = 0;
+        input = pattern.toCharArray();
+        operators.addAll(quantifiers);
+        special.addAll(operators);
+    }
+
+    private static Automaton constructNFA() {
         AutomatonState start = new AutomatonState();
         advance();
         AutomatonState last = expr(start);
-        if (pos != input.length) {
-            throw new RegexParseException("Parsing failed to process entire input string");
-        }
-        Automaton result = new Automaton(start, last);
-        // System.out.println(result.toString());
-        return result;
-    }
-
-    private static char getToken() {
-        return (pos < input.length) ? input[pos++] : 0;
-    }
-
-    private static void advance() {
-        token = getToken();
-    }
-
-    private static void match(char t) {
-        if (token == t) {
-            advance();
-        } else {
-            throw new RegexParseException("Unexpected token: " + token + ". Expecting: " + t + ".");
-        }
+        return new Automaton(start, last);
     }
 
     private static AutomatonState expr(AutomatonState current) {
-        // AutomatonState next = new AutomatonState();
-        // current.addEpsilonTransition(next);
         AutomatonState exit = term(current);
         AutomatonState last = exit;
         while (token == '|' && token != 0) {
             last = new AutomatonState();
             exit.addEpsilonTransition(last);
             advance();
-            // next = new AutomatonState();
-            // current.addEpsilonTransition(next);
             exit = term(current);
             exit.addEpsilonTransition(last);
         }
@@ -151,7 +132,7 @@ public class RegexParser {
         if (token == '(') {
             advance();
             last = expr(current);
-            match(')');
+            closeParenthesis();
         } else if (token == '\\') {
             advance();
             last = special(current);
@@ -162,29 +143,56 @@ public class RegexParser {
     }
 
     private static AutomatonState special(AutomatonState current) {
-        if (special.contains(token)) {
-            if (token == 'n') {
-                token = '\n';
-            } else if (token == 't') {
-                token = '\t';
-            }
-            AutomatonState next = new AutomatonState();
-            current.addTransition(token, next);
-            advance();
-            return next;
-        } else {
-            throw new RegexParseException("Incorrect Special Character");
+        if (!special.contains(token)) { parseError(Error.INV_SPEC, token); }
+        if (token == 'n') {
+            token = '\n';
+        } else if (token == 't') {
+            token = '\t';
         }
+        AutomatonState next = new AutomatonState();
+        current.addTransition(token, next);
+        advance();
+        return next;
     }
 
     private static AutomatonState character(AutomatonState current) {
-        if (!operators.contains(token)) {
-            AutomatonState next = new AutomatonState();
-            current.addTransition(token, next);
-            advance();
-            return next;
-        } else {
-            throw new RegexParseException("Invalid Character");
+        if (operators.contains(token)) { parseError(Error.INV_CHAR, token); }
+        AutomatonState next = new AutomatonState();
+        current.addTransition(token, next);
+        advance();
+        return next;
+    }
+
+    private static char getToken() {
+        return (pos < input.length) ? input[pos++] : 0;
+    }
+
+    private static void advance() {
+        token = getToken();
+    }
+
+    private static void closeParenthesis() {
+         if (token == ')') advance(); else parseError(Error.UNEXPECTED_TOK, token);
+    }
+
+    private static void parseError(Error errorCode, Character tok) {
+        String message;
+        switch (errorCode) {
+            case EOS:
+                message = "Could not complete Parsing: " + tok;
+                break;
+            case INV_CHAR:
+                message = "Invalid character: " + tok;
+                break;
+            case INV_SPEC:
+                message = "Invalid escaped character: " + tok;
+                break;
+            case UNEXPECTED_TOK:
+                message = "Unexpected Token: " + tok + ". Expected: )";
+                break;
+            default:
+                message = "Parsing error";
         }
+        throw new RegexParseException(message);
     }
 }
