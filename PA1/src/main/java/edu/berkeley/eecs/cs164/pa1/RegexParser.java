@@ -14,7 +14,8 @@ public class RegexParser {
      *          | expr '|' term             # Alternation
      *
      * term    -> factor
-     *          | term factor               # Concatenation
+     *          | term factor
+     *          | ε                         # Concatenation
      *
      * factor  -> atom
      *          | atom '+'
@@ -37,9 +38,9 @@ public class RegexParser {
      * Equivalent grammar:
      *
      * expr         -> term ('|' term)*
-     * term         -> factor+
+     * term         -> factor*
      * factor       -> atom ('+'|'*'|'?')?
-     * atom         -> '(' expr ')' | '\' special | char
+     * atom         -> '(' expr ')' | '\' special | character
      * special      -> 'n' | 't' | operators
      * operator     -> '|', '(', ')', '*', '+', '?', '\'
      * character    -> !operators
@@ -122,7 +123,14 @@ public class RegexParser {
     }
 
     private static AutomatonState term(AutomatonState current) {
-        AutomatonState last = factor(current);
+        AutomatonState last = current;
+        try {
+            last = factor(current);
+        } catch (RegexParseException e) {
+            if (e.getMessage().equals("Invalid escaped character: " + token)) {
+                parseError(Error.INV_SPEC, token);
+            }
+        }
         while (token != '|' && token != 0 && token != ')') {
             last = factor(last);
         }

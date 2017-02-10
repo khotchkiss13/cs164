@@ -22,6 +22,15 @@ public class RegexParserTest {
         Assert.assertNull(RegexParser.parse("a(b\\)"));
     }
 
+    @Test
+    public void acceptsEmptyRegex() {
+        // These should be OK
+        Assert.assertNotNull(RegexParser.parse("()"));
+        Assert.assertNotNull(RegexParser.parse("()*"));
+        // This should throw.
+        Assert.assertNotNull(RegexParser.parse("(a|)"));
+    }
+
     @Test(expected = RegexParseException.class)
     public void testOneOrMore() throws Exception {
         // These should be OK
@@ -46,12 +55,12 @@ public class RegexParserTest {
         Assert.assertNull(RegexParser.parse("?"));
     }
 
-    @Test(expected = RegexParseException.class)
+    @Test
     public void testOr() throws Exception {
         // These should be OK
         Assert.assertNotNull(RegexParser.parse("\\|"));
-        // This should throw.
-        Assert.assertNull(RegexParser.parse("|"));
+        // This should be OK (Empty term).
+        Assert.assertNotNull(RegexParser.parse("|"));
     }
 
     @Test(expected = RegexParseException.class)
