@@ -14,7 +14,8 @@ public class RegexParser {
      *          | expr '|' term             # Alternation
      *
      * term    -> factor
-     *          | term factor               # Concatenation
+     *          | term factor
+     *          | ε                         # Concatenation
      *
      * factor  -> atom
      *          | atom '+'
@@ -37,9 +38,9 @@ public class RegexParser {
      * Equivalent grammar:
      *
      * expr         -> term ('|' term)*
-     * term         -> factor+
+     * term         -> factor*
      * factor       -> atom ('+'|'*'|'?')?
-     * atom         -> '(' expr ')' | '\' special | char
+     * atom         -> '(' expr ')' | '\' special | character
      * special      -> 'n' | 't' | operators
      * operator     -> '|', '(', ')', '*', '+', '?', '\'
      * character    -> !operators
@@ -109,20 +110,23 @@ public class RegexParser {
     }
 
     private static AutomatonState expr(AutomatonState current) {
-        AutomatonState exit = term(current);
-        AutomatonState last = exit;
+        AutomatonState next = new AutomatonState();
+        current.addEpsilonTransition(next);
+        AutomatonState exit = term(next);
+        AutomatonState last = new AutomatonState();
+        exit.addEpsilonTransition(last);
         while (token == '|' && token != 0) {
-            last = new AutomatonState();
-            exit.addEpsilonTransition(last);
+            next = new AutomatonState();
+            current.addEpsilonTransition(next);
             advance();
-            exit = term(current);
+            exit = term(next);
             exit.addEpsilonTransition(last);
         }
         return last;
     }
 
     private static AutomatonState term(AutomatonState current) {
-        AutomatonState last = factor(current);
+        AutomatonState last = current;
         while (token != '|' && token != 0 && token != ')') {
             last = factor(last);
         }
