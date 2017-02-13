@@ -1,0 +1,36 @@
+This assignment had several challenges. The first of which was to describe the
+Grammar in a way that made the parser easier to understand and construct. The
+next major hurdle was actually building the Automaton. Building the parser itself
+was pretty easy after the Grammar was refactored, as it was very similar to the
+example SimpleParser, but figuring out how to build the Automaton with that was
+pretty tricky.
+
+I first had to figure out what transitions to add for which
+quantifiers and characters, as well as how I would be able to link together
+multiple states without really knowing exactly where I was in the parsing of the
+input. I think that my overall design of passing in the "starting" state to each
+helper function, which would then properly add transitions to that state and
+return the last state that it created for the flow was a pretty design choice,
+and made it easier to build the Automaton. I know my first attempts at building
+the Automaton were not very good, and it wasn't until I made this design decision
+that I was able to really figure out what to do.
+
+The last major hurdle was testing and debugging my parser and simulator. The
+simulator was easy enough to build, especially with the documents provided, but
+the given test suite wasn't very comprehensive so I had to construct tests. The
+first hurdle of this was making sure that A) I constructed valid regex, and B)
+I correctly understood how the parser should handle the regex so I could determine
+the correct output of the simulator for a given string. I definitely forgot
+exactly how the | operator should work, and this made my tests incorrect to begin
+with in some scenarios.
+
+The hardest part of debugging was determining if the bug was in the parser or the
+simulator, as it was really impossible to test one without also testing the other.
+This meant a lot of use of Graphviz to look at the Automatons my parser was
+outputting, and then manually checking them to see if they were valid and correct
+for the regex input.
+
+All in all, I didn't have too many difficulties, especially as I started early,
+and mostly finished early as well. It definitely allowed me to spend more time
+thinking through some of the more difficult aspects, as well as write decent
+tests for my project.

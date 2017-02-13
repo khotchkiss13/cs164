@@ -110,13 +110,16 @@ public class RegexParser {
     }
 
     private static AutomatonState expr(AutomatonState current) {
-        AutomatonState exit = term(current);
-        AutomatonState last = exit;
+        AutomatonState next = new AutomatonState();
+        current.addEpsilonTransition(next);
+        AutomatonState exit = term(next);
+        AutomatonState last = new AutomatonState();
+        exit.addEpsilonTransition(last);
         while (token == '|' && token != 0) {
-            last = new AutomatonState();
-            exit.addEpsilonTransition(last);
+            next = new AutomatonState();
+            current.addEpsilonTransition(next);
             advance();
-            exit = term(current);
+            exit = term(next);
             exit.addEpsilonTransition(last);
         }
         return last;

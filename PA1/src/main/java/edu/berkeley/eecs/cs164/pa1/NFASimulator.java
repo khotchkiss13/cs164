@@ -32,7 +32,9 @@ public class NFASimulator {
         currentStates.add(this.nfa.getStart());
         currentStates.addAll(closure(this.nfa.getStart()));
         char[] match = text.toCharArray();
-        for (char ch : match) { currentStates = dfaEdge(currentStates, ch); }
+        for (char ch : match) {
+          currentStates = dfaEdge(currentStates, ch);
+        }
         return currentStates.contains(this.nfa.getOut());
     }
 
@@ -69,6 +71,7 @@ public class NFASimulator {
         Set<AutomatonState> currEpStates = new HashSet<AutomatonState>();
         Set<AutomatonState> nextEpStates = new HashSet<AutomatonState>();
         Set<AutomatonState> stateCheck;
+        epStates.addAll(state.getEpsilonTransitions());
         nextEpStates.addAll(state.getEpsilonTransitions());
         do {
             currEpStates = nextEpStates;
