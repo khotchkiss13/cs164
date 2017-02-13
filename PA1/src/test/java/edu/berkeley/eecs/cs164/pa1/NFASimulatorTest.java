@@ -13,6 +13,7 @@ public class NFASimulatorTest {
         if (regex.length() + text.length() < 100) {
             String not = isMatch ? "" : "not ";
             System.out.printf("'%s' should %smatch regex '%s'%n", text, not, regex);
+            // System.out.println(nfa.toString());
         }
         Assert.assertEquals(isMatch, new NFASimulator(nfa).matches(text));
     }
@@ -88,6 +89,34 @@ public class NFASimulatorTest {
         testCase("a(bc)?d", "ad");
         testCase("a(bc)?d", "abcd");
         testCase("a(bc)?d", "abcbcd", false);
+    }
+
+    @Test
+    public void testEmptyExpressions() throws Exception {
+        testCase("|", "");
+        testCase("a|", "a");
+        testCase("a|", "");
+        testCase("a|", "b", false);
+        testCase("|a", "a");
+        testCase("|a", "");
+        testCase("|a", "b", false);
+        testCase("a|()", "a");
+        testCase("a|()", "");
+        testCase("a|()", "b", false);
+        testCase("a|()?", "a");
+        testCase("a|()?", "");
+        testCase("a|()?", "b", false);
+        testCase("a|()+", "a");
+        testCase("a|()+", "");
+        testCase("a|()+", "b", false);
+        testCase("a|()*", "a");
+        testCase("a|()*", "");
+        testCase("a|()*", "b", false);
+        testCase("(()+|a)+|a", "a");
+        testCase("(()+|a)+|a", "aa");
+        testCase("(()+|a)+|a", "aaaaaa");
+        testCase("(()+|a)+|a", "");
+        testCase("(()+|a)+|a", "b", false);
     }
 
     @Test
