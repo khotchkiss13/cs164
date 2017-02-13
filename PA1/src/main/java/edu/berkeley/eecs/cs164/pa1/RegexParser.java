@@ -124,13 +124,6 @@ public class RegexParser {
 
     private static AutomatonState term(AutomatonState current) {
         AutomatonState last = current;
-        try {
-            last = factor(current);
-        } catch (RegexParseException e) {
-            if (e.getMessage().equals("Invalid escaped character: " + token)) {
-                parseError(Error.INV_SPEC, token);
-            }
-        }
         while (token != '|' && token != 0 && token != ')') {
             last = factor(last);
         }

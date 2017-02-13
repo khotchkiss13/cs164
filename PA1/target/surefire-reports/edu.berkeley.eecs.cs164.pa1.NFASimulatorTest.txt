@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: edu.berkeley.eecs.cs164.pa1.NFASimulatorTest
 -------------------------------------------------------------------------------
-Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.945 sec
+Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.949 sec
